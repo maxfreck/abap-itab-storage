@@ -34,6 +34,7 @@ CLASS zcl_itab_storage DEFINITION PUBLIC ABSTRACT CREATE PUBLIC .
       RETURNING
         VALUE(ro_itab) TYPE REF TO zif_itab.
 
+private section.
 ENDCLASS.
 
 
@@ -61,26 +62,31 @@ CLASS ZCL_ITAB_STORAGE IMPLEMENTATION.
 
 
   METHOD get_file_extension.
-    DATA l TYPE i.
+    DATA lv_l TYPE i.
     rv_ext = iv_file_name.
-    l = strlen( rv_ext ) - 1.
-    WHILE l >= 0 AND rv_ext+l(1) <> '.'.
-      SUBTRACT 1 FROM l.
+    lv_l = strlen( rv_ext ) - 1.
+    WHILE lv_l >= 0 AND rv_ext+lv_l(1) <> '.'.
+      lv_l = lv_l - 1.
     ENDWHILE.
-    IF l < 1.
+    IF lv_l < 1.
       rv_ext = ''.   " '.blah' retuns ''
     ELSE.
-      rv_ext = rv_ext+l(*).       " 'foo.bar1.bar2' returns 'bar2'
+      rv_ext = rv_ext+lv_l(*).       " 'foo.bar1.bar2' returns 'bar2'
     ENDIF.
 
-    TRANSLATE rv_ext TO UPPER CASE.
+    rv_ext = to_upper( rv_ext ).
   ENDMETHOD.
 
 
   METHOD load_itab_implementations.
-    DATA(lo_oo_intf) = CAST cl_oo_interface( cl_oo_interface=>get_instance( 'ZIF_ITAB' ) ).
-    DATA(lt_classes) = lo_oo_intf->get_implementing_classes( ).
-    DATA lv_ext TYPE string.
+    TRY.
+        DATA(lo_oo_intf) = CAST cl_oo_interface( cl_oo_interface=>get_instance( 'ZIF_ITAB' ) ).
+        DATA(lt_classes) = lo_oo_intf->get_implementing_classes( ).
+        DATA lv_ext TYPE string.
+      CATCH cx_root.
+        "#TODO: error handling
+        RETURN.
+    ENDTRY.
 
     LOOP AT lt_classes ASSIGNING FIELD-SYMBOL(<ls_class>).
       CLEAR lv_ext.
@@ -88,9 +94,25 @@ CLASS ZCL_ITAB_STORAGE IMPLEMENTATION.
       IF lv_ext IS INITIAL.
         CONTINUE.
       ENDIF.
-      TRANSLATE lv_ext TO UPPER CASE.
+      lv_ext = to_upper( lv_ext ).
       INSERT VALUE #( extension = lv_ext
                       class = <ls_class>-clsname ) INTO TABLE mt_itab_by_ext.
     ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD zif_itab_storage~download.
+  ENDMETHOD.
+
+
+  METHOD zif_itab_storage~download_to_itab.
+  ENDMETHOD.
+
+
+  METHOD zif_itab_storage~get_next_file_name.
+  ENDMETHOD.
+
+
+  METHOD zif_itab_storage~store.
   ENDMETHOD.
 ENDCLASS.

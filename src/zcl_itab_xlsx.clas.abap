@@ -14,18 +14,12 @@ CLASS zcl_itab_xlsx DEFINITION PUBLIC CREATE PROTECTED.
     METHODS set_itab
       CHANGING
         ct_itab TYPE ANY TABLE.
+private section.
 ENDCLASS.
 
 
 
 CLASS ZCL_ITAB_XLSX IMPLEMENTATION.
-
-
-  METHOD from_xstring.
-    DATA(lo_xlsx) = NEW zcl_itab_xlsx( ).
-    lo_xlsx->mv_xlsx = iv_xstring.
-    ro_ret = lo_xlsx.
-  ENDMETHOD.
 
 
   METHOD set_itab.
@@ -85,9 +79,16 @@ CLASS ZCL_ITAB_XLSX IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD from_itab.
+  METHOD zif_itab~from_itab.
     DATA(lo_xlsx) = NEW zcl_itab_xlsx( ).
     lo_xlsx->set_itab( CHANGING ct_itab = ct_itab ).
+    ro_ret = lo_xlsx.
+  ENDMETHOD.
+
+
+  METHOD zif_itab~from_xstring.
+    DATA(lo_xlsx) = NEW zcl_itab_xlsx( ).
+    lo_xlsx->mv_xlsx = iv_xstring.
     ro_ret = lo_xlsx.
   ENDMETHOD.
 
@@ -97,12 +98,12 @@ CLASS ZCL_ITAB_XLSX IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_xstring.
+  METHOD zif_itab~get_xstring.
     rv_xstring = mv_xlsx.
   ENDMETHOD.
 
 
-  METHOD move_to_itab.
+  METHOD zif_itab~move_to_itab.
     DATA(lo_excel) =
       NEW cl_fdt_xl_spreadsheet( document_name = ''
                                  xdocument     = mv_xlsx ).
@@ -137,14 +138,23 @@ CLASS ZCL_ITAB_XLSX IMPLEMENTATION.
 
     LOOP AT <lt_excel> ASSIGNING FIELD-SYMBOL(<ls_src_line>).
       APPEND INITIAL LINE TO ct_itab ASSIGNING FIELD-SYMBOL(<ls_dst_line>).
-      LOOP AT lt_dst_comp ASSIGNING FIELD-SYMBOL(<ls_dst_comp>).
+      LOOP AT lt_dst_comp ASSIGNING FIELD-SYMBOL(<ls_dst_comp>).            "#EC CI_NESTED
         ASSIGN lt_src_comp[ sy-tabix ] TO FIELD-SYMBOL(<ls_src_comp>).
         IF sy-subrc <> 0.
           CONTINUE.
         ENDIF.
 
         ASSIGN COMPONENT <ls_dst_comp>-name OF STRUCTURE <ls_dst_line> TO FIELD-SYMBOL(<lv_dst>).
+        IF sy-subrc <> 0.
+          "#TODO: error handling
+          CONTINUE.
+        ENDIF.
         ASSIGN COMPONENT <ls_src_comp>-name OF STRUCTURE <ls_src_line> TO FIELD-SYMBOL(<lv_src>).
+        IF sy-subrc <> 0.
+          "#TODO: error handling
+          CONTINUE.
+        ENDIF.
+
         <lv_dst> = <lv_src>.
 
       ENDLOOP.
