@@ -8,6 +8,8 @@ INTERFACE zif_itab_storage
     RETURNING
       VALUE(rv_file_name) TYPE string .
 
+  METHODS delete.
+
   METHODS store
     IMPORTING
       !io_itab TYPE REF TO zif_itab .

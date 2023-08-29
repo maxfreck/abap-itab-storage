@@ -7,6 +7,7 @@ CLASS zcl_itab_cluster_storage  DEFINITION PUBLIC CREATE PUBLIC INHERITING FROM 
 
     METHODS zif_itab_storage~get_next_file_name REDEFINITION.
     METHODS zif_itab_storage~store REDEFINITION.
+    METHODS zif_itab_storage~delete REDEFINITION.
     METHODS zif_itab_storage~download REDEFINITION.
     METHODS zif_itab_storage~download_to_itab REDEFINITION.
 
@@ -117,7 +118,7 @@ CLASS zcl_itab_cluster_storage IMPLEMENTATION.
 
   METHOD zif_itab_storage~download_to_itab.
     DATA lv_buffer TYPE xstring.
-*
+
     DATA(lv_cluster_file_name) = CONV char22( cluster_file_name_dialog( ) ).
     IF lv_cluster_file_name IS INITIAL.
       RETURN.
@@ -148,5 +149,14 @@ CLASS zcl_itab_cluster_storage IMPLEMENTATION.
     DATA(lv_buffer) = io_itab->get_xstring( ).
 
     EXPORT buffer = lv_buffer TO DATABASE indx(zi) ID lv_filename.
+  ENDMETHOD.
+
+  METHOD zif_itab_storage~delete.
+    DATA(lv_cluster_file_name) = CONV char22( cluster_file_name_dialog( ) ).
+    IF lv_cluster_file_name IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    DELETE FROM DATABASE indx(zi) ID lv_cluster_file_name.
   ENDMETHOD.
 ENDCLASS.

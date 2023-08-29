@@ -4,6 +4,7 @@ CLASS zcl_itab_storage DEFINITION PUBLIC ABSTRACT CREATE PUBLIC .
     ALIASES:
       get_next_file_name FOR zif_itab_storage~get_next_file_name,
       store FOR zif_itab_storage~store,
+      delete FOR zif_itab_storage~delete,
       download FOR zif_itab_storage~download,
       download_to_itab FOR zif_itab_storage~download_to_itab.
 
@@ -114,5 +115,8 @@ CLASS ZCL_ITAB_STORAGE IMPLEMENTATION.
 
 
   METHOD zif_itab_storage~store.
+  ENDMETHOD.
+
+  METHOD zif_itab_storage~delete.
   ENDMETHOD.
 ENDCLASS.
